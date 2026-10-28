@@ -8,6 +8,8 @@
 - **Shell:** Zsh + zinit + powerlevel10k · **Terminal:** foot · **Editor:** Neovim (LazyVim)
 - **FS:** Btrfs
 
+![screenshot](screenshot.png)
+
 ## Estrutura
 
 | Pasta | Conteúdo |
