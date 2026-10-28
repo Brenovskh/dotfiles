@@ -1,0 +1,7 @@
+[Unit]
+Description=Snapshot quickshell-dots bar customizations into an independent git backup
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/quickshell/bin/qs-bar-backup-snapshot.sh
+Nice=19

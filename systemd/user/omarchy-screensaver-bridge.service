@@ -1,0 +1,12 @@
+[Unit]
+Description=Bridge org.freedesktop.ScreenSaver Inhibit/UnInhibit to Omarchy's stay-awake state
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/omarchy-screensaver-bridge
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

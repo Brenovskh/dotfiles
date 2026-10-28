@@ -1,0 +1,6 @@
+#!/bin/sh
+# Desmuta o microfone M7 nas duas camadas: hardware (ALSA) e PipeWire
+amixer -c M7 sset Mic cap >/dev/null
+wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0
+echo "Hardware: $(amixer -c M7 sget Mic | tail -1 | grep -o '\[on\]\|\[off\]')"
+echo "PipeWire: $(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)"

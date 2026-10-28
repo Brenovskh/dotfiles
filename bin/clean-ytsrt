@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Clean up YouTube auto-generated SRT files (yt-dlp --write-auto-sub).
+
+YouTube's auto-captions use a rolling two-line window: each real caption
+adds one new phrase while repeating the previous one, followed by a
+near-zero-duration filler block that promotes the new phrase to line 1.
+This collapses that into one clean cue per phrase, in order, with no
+duplicated or blank lines.
+
+Usage: clean-ytsrt input.srt [output.srt]
+If output.srt is omitted, input is overwritten in place (a .bak is kept).
+"""
+import re
+import sys
+from pathlib import Path
+
+TIME_RE = re.compile(
+    r"(\d{2}):(\d{2}):(\d{2}),(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2}),(\d{3})"
+)
+
+
+def parse_time(h, m, s, ms):
+    return ((int(h) * 60 + int(m)) * 60 + int(s)) * 1000 + int(ms)
+
+
+def fmt_time(ms):
+    h, ms = divmod(ms, 3600000)
+    m, ms = divmod(ms, 60000)
+    s, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+INDEX_RE = re.compile(r"^\d+\s*$")
+
+
+def parse_srt(text):
+    # Line-based state machine: a new block starts at a line that is a bare
+    # index number immediately followed by a timestamp line. This avoids
+    # treating a caption line that happens to be a lone space (YouTube uses
+    # these as placeholders) as a blank-line block separator.
+    lines = text.splitlines()
+    blocks = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        if INDEX_RE.match(lines[i]) and i + 1 < n and TIME_RE.search(lines[i + 1]):
+            m = TIME_RE.search(lines[i + 1])
+            start = parse_time(*m.group(1, 2, 3, 4))
+            end = parse_time(*m.group(5, 6, 7, 8))
+            i += 2
+            text_lines = []
+            while i < n and not (
+                INDEX_RE.match(lines[i]) and i + 1 < n and TIME_RE.search(lines[i + 1])
+            ):
+                text_lines.append(lines[i].strip())
+                i += 1
+            blocks.append((start, end, text_lines))
+        else:
+            i += 1
+    return blocks
+
+
+def clean(blocks):
+    entries = []  # [start, text]
+    last_text = None
+    last_end = None
+    for start, end, lines in blocks:
+        non_empty = [l for l in lines if l]
+        if not non_empty:
+            continue
+        candidate = non_empty[-1]
+        if candidate != last_text:
+            if entries:
+                entries[-1][1] = entries[-1][1]  # no-op, end fixed below
+            entries.append([start, candidate])
+            last_text = candidate
+        last_end = end
+    # Compute end times: bridge to the next entry's start, last one keeps
+    # the original last block's end time.
+    out = []
+    for i, (start, text) in enumerate(entries):
+        end = entries[i + 1][0] if i + 1 < len(entries) else last_end
+        if end <= start:
+            end = start + 1000
+        out.append((start, end, text))
+    return out
+
+
+def write_srt(entries, path):
+    with open(path, "w", encoding="utf-8") as f:
+        for i, (start, end, text) in enumerate(entries, 1):
+            f.write(f"{i}\n{fmt_time(start)} --> {fmt_time(end)}\n{text}\n\n")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: clean-ytsrt input.srt [output.srt]", file=sys.stderr)
+        sys.exit(1)
+    src = Path(sys.argv[1])
+    dst = Path(sys.argv[2]) if len(sys.argv) > 2 else src
+    blocks = parse_srt(src.read_text(encoding="utf-8"))
+    entries = clean(blocks)
+    if dst == src:
+        backup = src.with_suffix(src.suffix + ".bak")
+        backup.write_bytes(src.read_bytes())
+    write_srt(entries, dst)
+    print(f"{len(blocks)} blocos -> {len(entries)} legendas limpas: {dst}")
+
+
+if __name__ == "__main__":
+    main()

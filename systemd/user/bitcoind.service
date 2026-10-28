@@ -1,0 +1,21 @@
+[Unit]
+Description=Bitcoin daemon (Tor-only, pruned) para ~/.bitcoin
+Documentation=https://github.com/bitcoin/bitcoin/blob/master/doc/init.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=all
+ExecStart=/usr/bin/bitcoind -daemon=0 \
+                            -conf=%h/.bitcoin/bitcoin.conf \
+                            -datadir=%h/.bitcoin \
+                            -startupnotify='systemd-notify --ready' \
+                            -shutdownnotify='systemd-notify --stopping'
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+
+[Install]
+WantedBy=default.target

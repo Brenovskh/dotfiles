@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# syncleg — sincroniza legendas com o vídeo usando ffsubsync (análise do áudio).
+#
+# Uso:
+#   syncleg VIDEO [LEGENDA...]        sincroniza as legendas com o áudio do vídeo
+#   syncleg VIDEO                     sem legenda: pega todos os .srt/.ass/.vtt da pasta
+#   syncleg -r REF.srt LEGENDA...     usa outra legenda já sincronizada como referência
+#                                     (ex.: alinhar a PT-BR pela EN que já está certa)
+# Opções:
+#   -g   busca mais lenta e precisa (golden section search) para casos difíceis
+#   -n   não tenta corrigir framerate (use se o resultado sair "esticado")
+#
+# Saída: <nome-do-vídeo>.sync.srt (ou .sync2.srt, ...) ao lado do vídeo;
+# com -r, <nome-da-legenda>.sync.srt.
+# A legenda original nunca é alterada.
+
+set -euo pipefail
+
+usage() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+
+ref="" extra=()
+while getopts ":r:gnh" opt; do
+  case $opt in
+    r) ref=$OPTARG ;;
+    g) extra+=(--gss) ;;
+    n) extra+=(--no-fix-framerate) ;;
+    h) usage 0 ;;
+    *) usage 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+command -v ffsubsync >/dev/null || { echo "ffsubsync não instalado: pipx install ffsubsync" >&2; exit 1; }
+
+if [[ -n $ref ]]; then
+  [[ -f $ref ]] || { echo "Referência não encontrada: $ref" >&2; exit 1; }
+  reference=$ref
+  subs=("$@")
+else
+  [[ $# -ge 1 ]] || usage 1
+  reference=$1; shift
+  [[ -f $reference ]] || { echo "Vídeo não encontrado: $reference" >&2; exit 1; }
+  base="${reference%.*}"
+  subs=("$@")
+  if [[ ${#subs[@]} -eq 0 ]]; then
+    dir=$(dirname -- "$reference")
+    shopt -s nullglob nocaseglob
+    for f in "$dir"/*.{srt,ass,ssa,vtt}; do
+      [[ $f == *.sync.* || $f == *.sync[0-9]* ]] || subs+=("$f")
+    done
+    shopt -u nullglob nocaseglob
+  fi
+fi
+
+[[ ${#subs[@]} -gt 0 ]] || { echo "Nenhuma legenda para sincronizar." >&2; exit 1; }
+
+ok=0 fail=0
+for sub in "${subs[@]}"; do
+  [[ -f $sub ]] || { echo "Pulando (não existe): $sub" >&2; ((++fail)); continue; }
+  ext="${sub##*.}"; ext="${ext,,}"
+  [[ -n $ref ]] && base="${sub%.*}"
+  out="$base.sync.$ext"; n=2
+  while [[ -e $out ]]; do out="$base.sync$n.$ext"; ((n++)); done
+
+  echo "==> $(basename -- "$sub")"
+  log=$(mktemp)
+  if ffsubsync "$reference" -i "$sub" -o "$out" "${extra[@]}" 2>&1 | tee "$log" | grep -E 'offset seconds|framerate scale factor|score:' ; then :; fi
+  if [[ -s $out ]]; then
+    echo "    -> $(basename -- "$out")"
+    ((++ok))
+  else
+    echo "    falhou; log:" >&2; tail -5 "$log" >&2
+    ((++fail))
+  fi
+  rm -f "$log"
+done
+
+msg="$ok sincronizada(s)"; ((fail)) && msg+=", $fail falha(s)"
+echo "$msg"
+command -v notify-send >/dev/null && notify-send "syncleg" "$msg" || true
+((fail == 0))
