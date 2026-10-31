@@ -16,7 +16,8 @@
 |---|---|
 | `config/` | o que vive em `~/.config` (hypr, nvim, foot, kitty, quickshell, omarchy, mpv, btop, tmux, voxtype, wireplumber…) |
 | `bin/` | scripts próprios de `~/.local/bin` |
-| `systemd/user/` | serviços e timers do usuário |
+| `lib/` | shims de `~/.local/lib` (ex.: `voxtype-shim/wtype`, cola via Hyprland em apps XWayland) |
+| `systemd/user/` | serviços e timers do usuário (+ drop-ins `*.service.d/`) |
 | `zshrc`, `bashrc`, `p10k.zsh` | shell |
 
 ## Atualizar

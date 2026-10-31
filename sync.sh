@@ -16,7 +16,12 @@ cp "$C/starship.toml" config/
 rs --exclude='themes' --exclude='plugins' --exclude='*.sample' --exclude='*.sample/' "$C/omarchy/" config/omarchy/
 
 # serviços systemd do usuário (sem os links de enable)
-rsync -a --delete --include='*.service' --include='*.timer' --exclude='*' "$C/systemd/user/" systemd/user/
+rsync -a --delete --include='*.service' --include='*.timer' --include='*.service.d/' --include='*.service.d/*.conf' \
+  --exclude='*' "$C/systemd/user/" systemd/user/
+
+# shims de ~/.local/lib (ex.: wtype do VoxType que cola via Hyprland em janelas XWayland)
+mkdir -p lib
+rs ~/.local/lib/voxtype-shim/ lib/voxtype-shim/
 
 # scripts próprios de ~/.local/bin (shims do mise ficam de fora)
 for f in claude-usage clean-ytsrt mic-on fix-mic-mute.sh omarchy-screensaver-bridge omarchy-launch-webapp \

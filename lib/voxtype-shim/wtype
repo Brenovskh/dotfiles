@@ -1,0 +1,26 @@
+#!/bin/bash
+# Shim do wtype para o VoxType (ver voxtype.service.d/xwayland-paste.conf).
+# wtype digita por um keymap virtual que apps XWayland (ex.: Waterfox com
+# MOZ_ENABLE_WAYLAND=0) ignoram -> cirílico vira números. Nesses casos:
+# copia o texto com wl-copy e cola com Ctrl+V enviado pelo próprio Hyprland.
+REAL=/usr/bin/wtype
+LOG="${XDG_RUNTIME_DIR:-/tmp}/voxtype-wtype-shim.log"
+
+# Só intercepta digitação de texto puro (sem -k/-M/-P/-s etc.)
+text_mode=1
+for a in "$@"; do
+  case "$a" in -k|-M|-m|-P|-p|-s) text_mode=0 ;; esac
+done
+
+xw=$(hyprctl activewindow -j 2>/dev/null | jq -r '.xwayland // false')
+echo "$(date +%T) xwayland=$xw text_mode=$text_mode args=$*" >> "$LOG"
+
+if [[ $xw == true && $text_mode == 1 && $# -gt 0 ]]; then
+  text="${!#}"
+  printf '%s' "$text" | wl-copy
+  sleep 0.05
+  hyprctl eval 'hl.dispatch(hl.dsp.send_key_state({ mods = "CTRL", key = "V", state = "down" })) hl.timer(function() hl.dispatch(hl.dsp.send_key_state({ mods = "CTRL", key = "V", state = "up" })) end, { timeout = 50, type = "oneshot" })' >/dev/null
+  exit 0
+fi
+
+exec "$REAL" "$@"
