@@ -1,0 +1,4 @@
+#!/bin/bash
+# Força modo escuro em todo o sistema (GTK, libadwaita, portal → Electron/Firefox/Qt)
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark

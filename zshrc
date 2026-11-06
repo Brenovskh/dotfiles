@@ -56,6 +56,12 @@ setopt hist_ignore_space
 setopt hist_verify
 setopt inc_append_history
 
+# Modo anônimo: comando `anon` abre um zsh que não lê nem grava histórico
+if [[ -n $ZSH_ANON ]]; then
+  unset HISTFILE; SAVEHIST=0
+fi
+alias anon='print -P "%F{red}🕶  modo anônimo: nada deste shell vai pro histórico (exit para sair)%f"; ZSH_ANON=1 zsh'
+
 # =========================
 # ⚡ QUALIDADE DE VIDA
 # =========================

@@ -54,3 +54,15 @@ o.bind("SUPER + SHIFT + L", "Claude Code", { tui = "claude" })
 -- padrão (oculta, bar-off) -- aqui abre o painel de rede do quickshell-dots.
 hl.unbind("SUPER + CTRL + W")
 o.bind("SUPER + CTRL + W", "Network", "qs -p " .. os.getenv("HOME") .. "/.config/quickshell/bar/shell.qml ipc call panel network")
+
+-- VoxType push-to-talk: soltar F9 parava a gravação na hora e cortava a última
+-- letra (áudio ainda no buffer). O stop agora espera 0,4s (post-roll).
+hl.unbind("F9")
+o.bind("F9", "Start dictation (push-to-talk)", "voxtype record start")
+o.bind("F9", "Stop dictation (push-to-talk)", "sh -c 'sleep 0.4; voxtype record stop'", { release = true })
+
+-- Dictation keys from before Alt + Space and Right Alt became the defaults.
+-- Remove these lines to give the keys back to applications.
+if o.dictation_installed and o.dictation_installed() then
+  o.bind("SUPER + CTRL + X", "Toggle dictation", "omarchy-dictation toggle")
+end

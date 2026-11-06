@@ -1,0 +1,12 @@
+[Unit]
+Description=Sync primary selection (middle-click paste) between Wayland and XWayland
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/primary-bridge
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target
