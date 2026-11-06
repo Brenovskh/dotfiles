@@ -66,3 +66,7 @@ o.bind("F9", "Stop dictation (push-to-talk)", "sh -c 'sleep 0.4; voxtype record 
 if o.dictation_installed and o.dictation_installed() then
   o.bind("SUPER + CTRL + X", "Toggle dictation", "omarchy-dictation toggle")
 end
+
+-- OCR com melhorias para cirílico (ampliação 3x + correção de letras latim/cirílico).
+-- Substitui o padrão SUPER+CTRL+PRINT (era: omarchy-capture-text).
+o.rebind("SUPER + CTRL + PRINT", "Extract text (OCR) from screenshot", "/home/swanzax/.local/bin/ocr-capture-text")
