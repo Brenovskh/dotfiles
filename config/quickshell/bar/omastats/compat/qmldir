@@ -1,0 +1,9 @@
+singleton Style 1.0 Style.qml
+singleton Color 1.0 Color.qml
+singleton Util 1.0 Util.qml
+singleton Border 1.0 Border.qml
+WidgetButton 1.0 WidgetButton.qml
+PanelToolTip 1.0 PanelToolTip.qml
+PanelSeparator 1.0 PanelSeparator.qml
+PanelActionButton 1.0 PanelActionButton.qml
+BorderSurface 1.0 BorderSurface.qml

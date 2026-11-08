@@ -47,8 +47,8 @@ PanelWindow {
     // ── year overview (right-click the card to toggle) ──
     property bool yearView: false
     property int yearOffset: 0
-    readonly property var monthShortNames: ["JAN","FEB","MAR","APR","MAY","JUN",
-                                             "JUL","AUG","SEP","OCT","NOV","DEC"]
+    readonly property var monthShortNames: ["ЯНВ","ФЕВ","МАР","АПР","МАЙ","ИЮН",
+                                             "ИЮЛ","АВГ","СЕН","ОКТ","НОЯ","ДЕК"]
     property string newEventTitle: ""
     property string newEventTime: ""
 
@@ -86,8 +86,8 @@ PanelWindow {
         const parts = root.calendarSelectedDateKey.split("-");
         if (parts.length !== 3) return "";
         const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+        const months = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+        return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
     }
 
     // "Fri 6 · 09:30" — weekday + day-of-month + local start time for one
@@ -96,7 +96,7 @@ PanelWindow {
         const parts = String(s.dateKey).split("-");
         if (parts.length !== 3) return s.time;
         const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+        const wd = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][d.getDay()];
         return wd + " " + d.getDate() + " · " + s.time;
     }
 
@@ -170,9 +170,9 @@ PanelWindow {
                         text: {
                             calPopup.root.calendarTick;
                             const d = new Date();
-                            const mn = ["January","February","March","April","May","June",
-                                        "July","August","September","October","November","December"];
-                            return mn[d.getMonth()] + " " + d.getDate();
+                            const mn = ["января","февраля","марта","апреля","мая","июня",
+                                        "июля","августа","сентября","октября","ноября","декабря"];
+                            return d.getDate() + " " + mn[d.getMonth()];
                         }
                         color: heroRow.heroColor
                         font.family: root.mono
@@ -269,7 +269,7 @@ PanelWindow {
                             color: weekStartMa.containsMouse ? root.pillBorder : "transparent"
                             UiText {
                                 anchors.centerIn: parent
-                                text: "W"
+                                text: "НЕД"
                                 color: weekStartMa.containsMouse ? root.seal : root.inkDeep
                                 opacity: weekStartMa.containsMouse ? 1.0 : 0.7
                                 font.family: root.mono

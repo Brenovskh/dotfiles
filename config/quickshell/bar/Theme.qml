@@ -592,8 +592,8 @@ Item {
     }
 
     readonly property var calendarWeekdayLabels: calendarWeekStart === 0
-        ? ["SU","MO","TU","WE","TH","FR","SA"]
-        : ["MO","TU","WE","TH","FR","SA","SU"]
+        ? ["ВС","ПН","ВТ","СР","ЧТ","ПТ","СБ"]
+        : ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
 
     // ISO-8601 week number for the Thursday-anchored week containing `date`.
     function isoWeekNumber(date) {
@@ -650,8 +650,8 @@ Item {
     }
 
     readonly property string calendarMonthName: {
-        const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
-                        "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+        const months = ["ЯНВАРЬ","ФЕВРАЛЬ","МАРТ","АПРЕЛЬ","МАЙ","ИЮНЬ",
+                        "ИЮЛЬ","АВГУСТ","СЕНТЯБРЬ","ОКТЯБРЬ","НОЯБРЬ","ДЕКАБРЬ"];
         const now = new Date();
         return months[(now.getMonth() + calendarMonthOffset + 12000) % 12];
     }
@@ -1120,6 +1120,10 @@ Item {
 
     // ── combined System Stats panel state (CPU + GPU + Memory + Storage) ──
     property bool systemStatsVisible: false
+    // OmaStats port (omastats/): the sampler service registers itself here;
+    // omaStatsTab is the panel tab the bar readouts / IPC last asked for.
+    property var omaStats: null
+    property string omaStatsTab: "cpu"
     onSystemStatsVisibleChanged: popupOpened("systemStatsVisible")
 
     // ── BTC price panel state ──
@@ -1589,9 +1593,43 @@ Item {
         onLoaded: theme.parseSystemMem(systemMemFile.text())
     }
 
+    // The SYS bar pill reads the OmaStats sampler (omastats/, 1 s stream) so
+    // only one collector runs. Every 2nd sample feeds the 30-point sparkline,
+    // keeping its original 60 s span. The /proc poller below is only a
+    // fallback for when the OmaStats service isn't loaded.
+    property int _omaSamples: 0
+    function ingestOmaStats(snap) {
+        if (!snap) return
+        var cpu = snap.cpu || {}
+        var mem = snap.mem || {}
+        if (typeof cpu.total === "number") {
+            systemCpuPercent = Math.max(0, Math.min(100, Math.round(cpu.total)))
+            if ((_omaSamples++ % 2) === 0) {
+                var h = systemCpuHistory.slice()
+                h.push(systemCpuPercent / 100)
+                if (h.length > systemCpuMaxSamples) h.shift()
+                systemCpuHistory = h
+            }
+        }
+        if (Array.isArray(cpu.cores))
+            systemCpuPerCore = cpu.cores.map(function(v) { return Math.max(0, Math.min(100, Math.round(v))) })
+        if (mem.total > 0) {
+            var mib = 1048576
+            systemMemTotalMiB = Math.round(mem.total / mib)
+            systemMemAvailMiB = Math.round((mem.available || 0) / mib)
+            systemMemFreeMiB = Math.round((mem.free || 0) / mib)
+            systemMemCachedMiB = Math.round((mem.cached || 0) / mib)
+        }
+    }
+    Connections {
+        target: theme.omaStats
+        ignoreUnknownSignals: true
+        function onSnapshotChanged() { theme.ingestOmaStats(theme.omaStats.snapshot) }
+    }
+
     Timer {
         interval: (theme.modSystemStats || theme.systemStatsVisible) ? 2000 : 10000
-        running: true; repeat: true; triggeredOnStart: true
+        running: theme.omaStats === null; repeat: true; triggeredOnStart: true
         onTriggered: {
             systemCpuFile.reload()
             systemMemFile.reload()
@@ -2370,7 +2408,7 @@ Item {
         "h:mm AP",             // 7:14 PM
         "ddd d MMM HH:mm",     // Fri 28 Aug 19:14
         "ddd d MMM h:mm AP",   // Fri 28 Aug 7:14 PM   ← default
-        "d MMMM 'W'ww yyyy",   // 28 August W35 2026
+        "d MMMM 'нед.' ww yyyy", // 28 августа нед. 35 2026
         "yyyy-MM-dd HH:mm"     // 2026-08-28 19:14
     ]
     property int clockFormatIndex: 5

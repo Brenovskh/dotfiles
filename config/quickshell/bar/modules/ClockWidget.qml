@@ -18,6 +18,19 @@ Item {
         var fmt = String(root.clockFormat)
         if (fmt.indexOf("ww") !== -1)
             fmt = fmt.replace(/ww/g, pad(root.isoWeekNumber(now)))
+        // Russian day/month names: swap Qt's English name tokens for quoted
+        // literals before formatting ("d MMMM" → genitive "8 ноября").
+        const wdShort = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"]
+        const wdLong  = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"]
+        const mShort  = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"]
+        const mGen    = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"]
+        const d = now
+        fmt = fmt.replace(/dddd|ddd|MMMM|MMM/g, function(t) {
+            if (t === "dddd") return "'" + wdLong[d.getDay()] + "'"
+            if (t === "ddd")  return "'" + wdShort[d.getDay()] + "'"
+            if (t === "MMMM") return "'" + mGen[d.getMonth()] + "'"
+            return "'" + mShort[d.getMonth()] + "'"
+        })
         return Qt.formatDateTime(now, fmt)
     }
 

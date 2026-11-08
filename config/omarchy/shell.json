@@ -1,92 +1,11 @@
 {
   "bar": {
     "layout": {
-      "center": [
-        {
-          "id": "omarchy.clock",
-          "format": "ddd d MMM HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm"
-        }
-      ],
-      "left": [
-        {
-          "id": "omarchy.menu"
-        },
-        {
-          "id": "omarchy.workspaces"
-        }
-      ],
-      "right": [
-        {
-          "id": "omarchy.tray"
-        },
-        {
-          "id": "omarchy.keyboard-layout"
-        },
-        {
-          "id": "glafeara.languages"
-        },
-        {
-          "id": "akshar.radio-atlas"
-        },
-        {
-          "id": "omarchy.agents"
-        },
-        {
-          "id": "omarchy.bluetooth"
-        },
-        {
-          "id": "omarchy.network"
-        },
-        {
-          "id": "omarchy.audio"
-        },
-        {
-          "id": "omarchy.monitor"
-        },
-        {
-          "id": "omarchy.power"
-        }
-      ],
-      "centerBegin": [
-        {
-          "id": "omarchy.indicators"
-        }
-      ],
-      "centerEnd": [
-        {
-          "id": "omarchy.elsewhen",
-          "cities": [
-            {
-              "name": "Sao Paulo",
-              "zone": "America/Sao_Paulo"
-            },
-            {
-              "name": "London",
-              "zone": "Europe/London"
-            },
-            {
-              "name": "Dubai",
-              "zone": "Asia/Dubai"
-            },
-            {
-              "name": "Tokyo",
-              "zone": "Asia/Tokyo"
-            },
-            {
-              "name": "Los Angeles",
-              "zone": "America/Los_Angeles"
-            }
-          ]
-        },
-        {
-          "id": "omarchy.weather"
-        },
-        {
-          "id": "omarchy.system-update"
-        }
-      ]
+      "left": [],
+      "centerBegin": [],
+      "center": [],
+      "centerEnd": [],
+      "right": []
     },
     "position": "top",
     "transparent": false
@@ -95,6 +14,10 @@
     "lock": 2100,
     "screensaver": 1800
   },
-  "plugins": [],
+  "plugins": [
+    {
+      "id": "akshar.radio-atlas"
+    }
+  ],
   "version": 1
 }

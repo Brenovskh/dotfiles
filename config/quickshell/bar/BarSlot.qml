@@ -10,6 +10,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick.Shapes
 import "modules"
+import "omastats"
 
 PanelWindow {
     id: barSlot
@@ -394,7 +395,7 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         text: {
                             clock.now;
-                            var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                            var days = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
                             var d = new Date();
                             return days[d.getDay()] + " " + d.getDate();
                         }

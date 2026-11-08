@@ -9,6 +9,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import "panels"
+import "omastats"
 
 Item {
     id: root
@@ -248,7 +249,8 @@ Item {
     CalendarPopup { root: theme }
     ArchUpdaterPanel { root: theme }
     PowerProfilePanel { root: theme }
-    SystemStatsPanel { root: theme }
+    OmaStatsService { theme: theme }
+    OmaStatsPanel { root: theme }
     BtcPricePanel { root: theme }
     WorldClockPopup { root: theme }
     AiUsagePanel { root: theme }
