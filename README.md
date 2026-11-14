@@ -15,7 +15,7 @@
 | Pasta | Conteúdo |
 |---|---|
 | `config/` | o que vive em `~/.config` (hypr, nvim, foot, kitty, quickshell, omarchy, mpv, btop, tmux, voxtype, wireplumber…) |
-| `bin/` | scripts próprios de `~/.local/bin` |
+| `bin/` | scripts próprios de `~/.local/bin` (ex.: `fuxi-auto-switch`, troca a saída de áudio sozinho quando o fone é ligado no cabo para carregar) |
 | `lib/` | shims de `~/.local/lib` (ex.: `voxtype-shim/wtype`, cola via Hyprland em apps XWayland) |
 | `systemd/user/` | serviços e timers do usuário (+ drop-ins `*.service.d/`) |
 | `zshrc`, `bashrc`, `p10k.zsh` | shell |
