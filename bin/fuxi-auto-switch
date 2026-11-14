@@ -1,0 +1,31 @@
+#!/bin/bash
+# Troca a saída de áudio automaticamente quando o fone Fuxi-H3 é ligado por cabo.
+# Receptor sem fio = porta USB fixa abaixo; qualquer outro Fuxi-H3 = fone no cabo.
+DONGLE_PATH="pci-0000:09:00.3-usb-0:3:"
+
+sink_by() { # $1 = "cable" | "dongle"
+  pactl -f json list sinks | jq -r --arg d "$DONGLE_PATH" --arg w "$1" '
+    .[] | select(.name|test("Fuxi-H3"))
+    | select(((.properties["device.bus_path"] // "") | startswith($d)) == ($w == "dongle"))
+    | .name' | head -n1
+}
+
+switch_to() {
+  [ -n "$1" ] || return
+  [ "$(pactl get-default-sink)" = "$1" ] && return
+  pactl set-default-sink "$1"
+  pactl list sink-inputs short | cut -f1 | while read -r i; do
+    pactl move-sink-input "$i" "$1" 2>/dev/null
+  done
+}
+
+apply() {
+  local cable; cable=$(sink_by cable)
+  if [ -n "$cable" ]; then switch_to "$cable"; else switch_to "$(sink_by dongle)"; fi
+}
+
+apply
+pactl subscribe | grep --line-buffered -E "'(new|remove)' on sink #" | while read -r _; do
+  sleep 1
+  apply
+done

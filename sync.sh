@@ -24,7 +24,7 @@ mkdir -p lib
 rs ~/.local/lib/voxtype-shim/ lib/voxtype-shim/
 
 # scripts próprios de ~/.local/bin (shims do mise ficam de fora)
-for f in claude-usage clean-ytsrt mic-on fix-mic-mute.sh omarchy-screensaver-bridge omarchy-launch-webapp \
+for f in claude-usage clean-ytsrt fuxi-auto-switch mic-on fix-mic-mute.sh omarchy-screensaver-bridge omarchy-launch-webapp \
          qs-arch-apply-update.sh qs-arch-security-gate.sh qs-arch-update-check.sh qs-aur-blacklist-fetch.sh \
          qs-proj syncleg waybar-clock-theme-sync.sh; do
   [ -f ~/.local/bin/$f ] && cp ~/.local/bin/$f bin/

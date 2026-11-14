@@ -1,0 +1,12 @@
+[Unit]
+Description=Troca automática de saída de áudio do fone Fuxi-H3 (cabo x sem fio)
+After=pipewire-pulse.service wireplumber.service
+Wants=pipewire-pulse.service
+
+[Service]
+ExecStart=%h/.local/bin/fuxi-auto-switch
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
